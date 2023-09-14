@@ -1,0 +1,25 @@
+<form [formGroup]="form" (keydown)="enterWithEnter($event)">
+    <div class="grid grid-cols-1 divide-y">
+
+        <div id="form" class="h-full flex gap">
+            <div class="form-container">
+
+                <div *ngFor="let field of program.inputFields" class="w-[49%]">
+                    <app-jv-input-field label={{field.label}} placeholder={{field.placeholder}}
+                        formControlName={{field.name}} [messages]="field.validations">
+                    </app-jv-input-field>
+                </div>
+            </div>
+            <div>
+            </div>
+
+        </div>
+        <div id="enter" class="w-full flex flex-row justify-end">
+            <button *ngIf="program" (click)="enter()"
+                class="rounded bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+                type="button">
+                Enter
+            </button>
+        </div>
+    </div>
+</form>

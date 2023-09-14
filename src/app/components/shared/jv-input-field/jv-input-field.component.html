@@ -1,0 +1,10 @@
+<div class="mb-2">
+    <label class="label" [ngClass]="{'required': required && label && label.length > 0}" for="{{ name }}">
+        {{ label }}
+    </label>
+    <input class="input" type="{{ type }}" [ngClass]="{'error-input': control && control.invalid && control.touched}"
+        (blur)="onTouched($event)" placeholder="{{ placeholder }}" autocomplete="on" [(ngModel)]='value'>
+    <div *ngIf="control && control.invalid && control.touched">
+        <p *ngFor="let errorMessag of errorMessages" class="local-error">{{ errorMessag }}</p>
+    </div>
+</div>

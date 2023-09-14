@@ -1,0 +1,30 @@
+<!-- the whole modal -->
+<div *ngIf="modelIsOpen" class="fixed inset-0 z-50 justify-center items-center flex">
+  <!-- backdrop -->
+  <div class="opacity-25 fixed inset-0 bg-black" (click)="closeModal()"></div>
+  <!-- white container -->
+  <div class="relative w-auto my-6 mx-auto max-w-[70%]">
+
+    <!-- check circle icon -->
+    <div
+      class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none justify-center items-center pt-6  min-w-[40rem]">
+
+      <!-- title -->
+      <h3 class="text-3xl font-semibold">
+        {{program?.title}}
+      </h3>
+
+      <div class="w-full bg-gray-200 flex flex-col justify-end h-full">
+        <app-progress-bar *ngIf="isLoading"></app-progress-bar>
+        <div class="p-3 min-h-[100px]">
+          <app-program *ngIf="program" (result)="onEnter($event)" [program]="program"></app-program>
+        </div>
+
+      </div>
+      <!-- message -->
+      <p *ngIf="result" class="my-4 text-blueGray-500 text-lg leading-relaxed w-3/4">
+        {{result}}
+      </p>
+    </div>
+  </div>
+</div>
