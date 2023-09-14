@@ -24,7 +24,6 @@ export class ProgramComponent implements OnChanges {
 
 
   ngOnChanges(): void {
-    console.log(`this.program`, this.program);
     if (this.program) {
       this.createForm();
     }
@@ -95,9 +94,6 @@ export class ProgramComponent implements OnChanges {
     try {
       const keys = Object.keys(params);
       const values = Object.values(params);
-
-      console.log(`jsCode`, jsCode);
-      // jsCode = `return firstNum + secondNum;`;
 
       const dynamicFn = new Function(...keys, `return (function run(params) {${jsCode}})(...arguments)`);
       const result = dynamicFn(...values);

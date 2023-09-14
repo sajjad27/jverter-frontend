@@ -31,7 +31,16 @@
             </a>
         </div>
 
+        <button (click)="signin()"
+            class="rounded bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 shadow hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150"
+            type="button">
+            sign in
+        </button>
+
+        <h1 *renderRoles="[appRole.ADMIN]">admin only</h1>
+        <h1 *renderRoles="[appRole.PROGRAMMER]">programmer only</h1>
+
         <app-no-result-found *ngIf="!filteredPrograms"></app-no-result-found>
     </div>
-    
+
 </div>

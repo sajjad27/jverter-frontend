@@ -3,6 +3,8 @@ import { InputField, InputFieldType, Program, ValidatorType } from 'src/app/comp
 import { ModalService } from 'src/app/service/modal.service';
 import { ProgramService } from '../service/programs-service';
 import { Subscription } from 'rxjs';
+import { AuthService } from './auth/authService/auth.service';
+import { AppRole } from './auth/model/app-role';
 
 @Component({
   selector: 'app-programs',
@@ -11,11 +13,13 @@ import { Subscription } from 'rxjs';
 })
 export class ProgramsComponent implements OnInit {
 
-  constructor(private modalService: ModalService, private programService: ProgramService) { }
+  constructor(private modalService: ModalService, private programService: ProgramService, private authService: AuthService) { }
 
   programs: Program[] = [];
   filteredPrograms: Program[] = [];
   programsSubscription!: Subscription;
+
+  appRole = AppRole;
 
 
 
@@ -77,5 +81,18 @@ export class ProgramsComponent implements OnInit {
   openProgram(program: Program) {
     this.modalService.openModal(program).subscribe(() => {
     });
+  }
+
+
+  signin() {
+
+    this.authService.logIn({ username: "sajad", password: "sajad" }).subscribe(() => {
+      // this.routeToDefaultPage();
+      let manyRoles = this.authService.getUserRoles()
+    }, errorResponse => {
+      // this.isLoading = false;
+      // this.formHelper.mapErrors(errorResponse, this.form, this.globalErrorMessages);
+    });
+
   }
 }
