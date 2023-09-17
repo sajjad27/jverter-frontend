@@ -17,18 +17,17 @@ export class ProgramsComponent implements OnInit {
 
   programs: Program[] = [];
   filteredPrograms: Program[] = [];
-  programsSubscription!: Subscription;
+  $programsSubscription!: Subscription;
 
   appRole = AppRole;
-
-
 
   ngOnInit(): void {
     this.loadPrograms()
     this.filterItems("")
   }
+  
   loadPrograms() {
-    this.programsSubscription = this.programService.$programs.subscribe(programs => {
+    this.$programsSubscription = this.programService.$programs.subscribe(programs => {
       this.programs = programs
       this.filterItems("")
     })
@@ -81,18 +80,5 @@ export class ProgramsComponent implements OnInit {
   openProgram(program: Program) {
     this.modalService.openModal(program).subscribe(() => {
     });
-  }
-
-
-  signin() {
-
-    this.authService.logIn({ username: "sajad", password: "sajad" }).subscribe(() => {
-      // this.routeToDefaultPage();
-      let manyRoles = this.authService.getUserRoles()
-    }, errorResponse => {
-      // this.isLoading = false;
-      // this.formHelper.mapErrors(errorResponse, this.form, this.globalErrorMessages);
-    });
-
   }
 }

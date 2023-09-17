@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import jwt_decode from 'jwt-decode';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { getUrl } from 'src/environments/URLs.service';
 import { AppRole } from '../model/app-role';
 import { AuthenticationResponse } from '../model/authenticationResponse';
+import { UserData } from '../model/user-data.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,21 +15,31 @@ import { AuthenticationResponse } from '../model/authenticationResponse';
 
 export class AuthService {
 
+  private _STORAGE_TOKEN_KEY = "token";
+  private _STORAGE_REFRESH_TOKEN_KEY = "refreshtoken";
 
   private tokenExpirationTimer: any;
   jwtHelper = new JwtHelperService();
-  roles: AppRole[] = [];
 
-  constructor(private http: HttpClient, private router: Router) { }
+  $userData: BehaviorSubject<UserData | null> = new BehaviorSubject<UserData | null>(null);
+  userData: UserData | null = null;
+
+
+  constructor(private http: HttpClient) {
+    this.$userData.subscribe(userData => {
+      this.userData = userData
+    })
+    this.initializeAfterReload();
+  }
 
   isRefreshaTokenExpired() {
     return this.jwtHelper.isTokenExpired(this.getRefToken());
   }
 
   logIn(body: { username: string, password: string }) {
-    return this.http.post<AuthenticationResponse>(getUrl("login"), body).pipe(tap(response => {
-      this.persistTokens(response, body.username);
-    }));
+    this.http.post<AuthenticationResponse>(getUrl("login"), body).subscribe(response => {
+      this.persistTokens(response);
+    });
   }
 
   refreshToken() {
@@ -37,16 +48,50 @@ export class AuthService {
     }
     return this.http.post<AuthenticationResponse>(getUrl("refreshToken"), body)
       .pipe(tap(response => {
-        this.persistTokens(response, this.getUsername());
+        this.persistTokens(response);
       }));
   }
 
-  private persistTokens(authenticationResponse: AuthenticationResponse, username: string) {
-    sessionStorage.setItem("token", authenticationResponse.token as string);
-    sessionStorage.setItem("refreshtoken", authenticationResponse.refreshToken as string);
-    let refreshtokenClaims = jwt_decode(authenticationResponse.refreshToken as string) as any
-    this.autoLogout(refreshtokenClaims["iat"], refreshtokenClaims["exp"]);
+  private persistTokens(authenticationResponse: AuthenticationResponse) {
+    sessionStorage.setItem(this._STORAGE_TOKEN_KEY, authenticationResponse.token as string);
+    sessionStorage.setItem(this._STORAGE_REFRESH_TOKEN_KEY, authenticationResponse.refreshToken as string);
+    this.initializeAfterReload();
   }
+
+  private initializeAfterReload() {
+    const token = this.getAccessToken();
+    const refreshToken = this.getRefToken();
+  
+    if (token && refreshToken) {
+      this.handleJwtPayload(token);
+      const refreshTokenClaims = jwt_decode(refreshToken) as any;
+      this.autoLogout(refreshTokenClaims["iat"], refreshTokenClaims["exp"]);
+    }
+  }
+
+  handleJwtPayload(token: string | undefined) {
+    if (token) {
+      const tokenData = this.jwtHelper.decodeToken(token);
+      if (tokenData) {
+        let userId = tokenData.sub;
+        let username = tokenData.username;
+        console.log(`auth username`, username);
+        let userRoles = this._getRolesFromToken(tokenData)
+        this.$userData.next({ userId: userId, username: username, userRoles: userRoles })
+      }
+    }
+  }
+
+  private _getRolesFromToken(tokenData: any): AppRole[] {
+    let roles: AppRole[] = [];
+    if (tokenData && tokenData.roles) {
+      for (const roleKey of Object.keys(tokenData.roles)) {
+        roles.push(+AppRole[tokenData.roles[roleKey]]);
+      }
+    }
+    return roles
+  }
+
 
   autoLogout(iat: Number, exp: Number) {
     this.resetLogoutTimer()
@@ -58,16 +103,16 @@ export class AuthService {
 
   logout(errorCode?: string) {
     this.resetAuthData();
-    this.router.navigate(['/login'], { queryParams: { 'err-msg': errorCode } }).then(() => {
-      window.location.reload();
-    });
+    // this.router.navigate(['/login'], { queryParams: { 'err-msg': errorCode } }).then(() => {
+    //   window.location.reload();
+    // });
 
   }
 
   resetAuthData() {
     sessionStorage.clear();
-    this.resetLogoutTimer()
-    this.roles = []
+    this.resetLogoutTimer();
+    this.$userData.next(null)
   }
 
   private resetLogoutTimer() {
@@ -77,60 +122,20 @@ export class AuthService {
     this.tokenExpirationTimer = null
   }
 
-  // resetPassword(body) {
-  //   return this.http.post<any>(getUrl("resetPassword"), body);
-  // }
-
   getAccessToken(): string {
-    return window.sessionStorage.getItem('token') as string;
+    return window.sessionStorage.getItem(this._STORAGE_TOKEN_KEY) as string;
   }
 
   getRefToken(): string {
-    return window.sessionStorage.getItem('refreshtoken') as string;
+    return window.sessionStorage.getItem(this._STORAGE_REFRESH_TOKEN_KEY) as string;
   }
 
   isLoggedIn() {
     return this.getRefToken() != null && !this.isRefreshaTokenExpired();
   }
 
-
-  getUserRoles(): AppRole[] {
-    const token = this.getAccessToken();
-    if (token && !this.roles.length) {
-      const tokenData = JSON.parse(atob(token.split('.')[1]));
-      if (tokenData && tokenData.roles) {
-        for (const roleKey of Object.keys(tokenData.roles)) {
-            this.roles.push(+AppRole[tokenData.roles[roleKey]]);
-        }
-      }
-    }
-    return this.roles;
+  userHasRole(role: AppRole): boolean | undefined {
+    return this.userData?.userRoles?.includes(role)
   }
 
-
-
-
-
-  isAdmin() {
-    // return this.getUserRole()?.trim() === 'isAdmin';
-  }
-  isWorker() {
-    // return this.getUserRole()?.trim() === 'isWorker';
-  }
-  isSupervisor() {
-    // return this.getUserRole()?.trim() === 'isSupervisor';
-  }
-  isAccountant() {
-    // return this.getUserRole()?.trim() === 'isAccountant';
-  }
-  isHr() {
-    // return this.getUserRole()?.trim() === 'isHr';
-  }
-
-  getUserId() {
-    return window.sessionStorage.getItem('sub') as string;
-  }
-  getUsername(): string {
-    return window.sessionStorage.getItem('username') as string;
-  }
 }

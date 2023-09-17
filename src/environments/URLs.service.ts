@@ -5,7 +5,7 @@ const services = {
     refreshToken: "/auth/refreshtoken",
 
     programs: "/programs/public",
-    program: "/programs/public/{{programId}}",
+    program: "/programs/{{programId}}",
 };
 
 type possibleValues = keyof typeof services

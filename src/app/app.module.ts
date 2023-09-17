@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { JwtHelperService, JwtModule } from '@auth0/angular-jwt';
+import { JWT_OPTIONS, JwtHelperService, JwtModule } from '@auth0/angular-jwt';
 import { routes } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { RenderRolesDirective } from './components/programs/components/auth/authService/render-roles.directive';
@@ -15,6 +15,7 @@ import { JvFieldComponent } from './components/shared/jv-input-field/jv-input-fi
 import { ModalComponent } from './components/shared/modal/modal.component';
 import { NoResultFoundComponent } from './components/shared/no-result-found/no-result-found.component';
 import { ProgressBarComponent } from './components/shared/progress-bar/progress-bar.component';
+import { AuthInterceptor } from './components/programs/components/auth/interceptor/AuthInterceptor.service';
 
 
 @NgModule({
@@ -34,19 +35,14 @@ import { ProgressBarComponent } from './components/shared/progress-bar/progress-
     BrowserModule,
     ReactiveFormsModule,
     HttpClientModule,
-    RouterModule.forRoot(routes),
-    JwtModule.forRoot({
-      config: {
-        tokenGetter: () => {
-          return localStorage.getItem('access_token'); // Change this to your token storage mechanism
-        },
-        // allowedDomains: ['example.com'], // Replace with your domain(s)
-        // disallowedRoutes: ['example.com/auth/authenticate'], // Replace with your excluded route(s)
-      },
-    }
-    )
+    RouterModule.forRoot(routes)
   ],
-  providers: [JwtHelperService],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }, { provide: JWT_OPTIONS, useValue: JWT_OPTIONS }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

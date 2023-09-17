@@ -18,8 +18,7 @@ export class RenderRolesDirective {
   }
 
   private checkUserHasRequiredRoles(requiredRoles: AppRole[]): boolean {
-    const userRoles: AppRole[] = this.authService.getUserRoles();
-    let hasRequiredRole: boolean = requiredRoles.some(requiredRole => userRoles.includes(requiredRole));
+    let hasRequiredRole: boolean = requiredRoles.some(requiredRole => this.authService.userHasRole(requiredRole));
     return hasRequiredRole;
   }
 
