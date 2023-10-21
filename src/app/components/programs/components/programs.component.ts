@@ -24,8 +24,9 @@ export class ProgramsComponent implements OnInit {
   ngOnInit(): void {
     this.loadPrograms()
     this.filterItems("")
+    this.authService.logIn({ "username": "sajad", "password": "sajad" })
   }
-  
+
   loadPrograms() {
     this.$programsSubscription = this.programService.$programs.subscribe(programs => {
       this.programs = programs
@@ -81,4 +82,9 @@ export class ProgramsComponent implements OnInit {
     this.modalService.openModal(program).subscribe(() => {
     });
   }
+
+
+
+
 }
+

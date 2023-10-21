@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import jwt_decode from 'jwt-decode';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { getUrl } from 'src/environments/URLs.service';
 import { AppRole } from '../model/app-role';
@@ -61,7 +61,7 @@ export class AuthService {
   private initializeAfterReload() {
     const token = this.getAccessToken();
     const refreshToken = this.getRefToken();
-  
+
     if (token && refreshToken) {
       this.handleJwtPayload(token);
       const refreshTokenClaims = jwt_decode(refreshToken) as any;
@@ -75,7 +75,6 @@ export class AuthService {
       if (tokenData) {
         let userId = tokenData.sub;
         let username = tokenData.username;
-        console.log(`auth username`, username);
         let userRoles = this._getRolesFromToken(tokenData)
         this.$userData.next({ userId: userId, username: username, userRoles: userRoles })
       }
@@ -103,9 +102,6 @@ export class AuthService {
 
   logout(errorCode?: string) {
     this.resetAuthData();
-    // this.router.navigate(['/login'], { queryParams: { 'err-msg': errorCode } }).then(() => {
-    //   window.location.reload();
-    // });
 
   }
 
@@ -138,4 +134,7 @@ export class AuthService {
     return this.userData?.userRoles?.includes(role)
   }
 
+  togglz() {
+    return this.http.get('http://localhost:8080/togglz/index', { responseType: 'text' })
+  }
 }

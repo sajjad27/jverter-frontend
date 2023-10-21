@@ -1,0 +1,10 @@
+<div class="flex justify-center py-20 sm:py-12 xs:py-0 ">
+    <div class="w-1/2 sm:w-1/2 xs:w-full bg-white divide-y">
+        <div *ngFor="let feature of features" class="p-4">
+            <div class="flex justify-between">
+                <p>{{feature.name}}</p>
+                <app-toggle [checked]="feature.enabled" (onCheckChanged)="onCheckChanged($event, feature.name)"></app-toggle>
+            </div>
+        </div>
+    </div>
+</div>

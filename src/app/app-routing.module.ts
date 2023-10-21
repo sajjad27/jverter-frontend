@@ -1,13 +1,19 @@
 import { Routes } from '@angular/router';
 import { ProgramsComponent } from './components/programs/components/programs.component';
+import { TogglzGuard } from './guard/togglz.guard';
+import { TogglzComponent } from './components/togglz/togglz.component';
 
 export const routes: Routes = [
-
   {
-    path: 'programs', children: [
-      { path: "", component: ProgramsComponent }
+    path: '',
+    canActivate: [TogglzGuard],
+    children: [
+      { path: 'programs', component: ProgramsComponent },
+      { path: 'togglz', component: TogglzComponent },
+      { path: '**', redirectTo: '/programs' }
     ]
-  },
-  { path: '**', redirectTo: '/programs' }
-
+  }
 ];
+
+
+

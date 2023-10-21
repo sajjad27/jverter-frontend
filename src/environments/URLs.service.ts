@@ -6,6 +6,8 @@ const services = {
 
     programs: "/programs/public",
     program: "/programs/{{programId}}",
+    allTogglz: "/actuator/togglz",
+    singleTogglz: "/actuator/togglz/{{featureName}}",
 };
 
 type possibleValues = keyof typeof services

@@ -24,7 +24,7 @@ module.exports = {
         },
         // 'secondary': '#b0d0d3',
         'focused-primary': "#1b47a6",
-        'bg': "#fff6",
+        'bg': "#E1E1E1",
         'pr-font': "#262433",
         'secondary-font': "#71707A",
         'default-ring': "#3B82F680"
